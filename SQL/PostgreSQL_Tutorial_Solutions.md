@@ -194,7 +194,6 @@ How can you produce a list of bookings on the day of 2012-09-14 which will cost 
 How can you output a list of all members, including the individual who recommended them (if any), without using any joins? Ensure that there are no duplicates in the list, and that each firstname + surname pairing is formatted as a column and ordered.
 
 ```
-
 ```
 
 8.  Produce a list of costly bookings, using a subquery
@@ -204,7 +203,6 @@ The Produce a list of costly bookings exercise contained some messy logic: we ha
 How can you produce a list of bookings on the day of 2012-09-14 which will cost the member (or guest) more than $30? Remember that guests have different costs to members (the listed costs are per half-hour 'slot'), and the guest user is always ID 0. Include in your output the name of the facility, the name of the member formatted as a single column, and the cost. Order by descending cost.
 
 ```
-
 ```
 
 ## Modifying data
@@ -239,7 +237,10 @@ Let's try adding the spa to the facilities table again. This time, though, we wa
 - Name: 'Spa', membercost: 20, guestcost: 30, initialoutlay: 100000, monthlymaintenance: 800.
 
 ```
-INSERT INTO cd.facilities(facid, name, membercost, guestcost, initialoutlay, monthlymaintenance) VALUES (SELECT MAX(facid) + 1 FROM cd.facilities), 'Spa', 20, 30, 100000, 800);
+INSERT INTO cd.facilities(facid, name, membercost, guestcost, initialoutlay, monthlymaintenance)
+VALUES (
+  SELECT MAX(facid) + 1 FROM cd.facilities
+), 'Spa', 20, 30, 100000, 800);
 ```
 
 4. Update some existing data
@@ -247,7 +248,9 @@ INSERT INTO cd.facilities(facid, name, membercost, guestcost, initialoutlay, mon
 We made a mistake when entering the data for the second tennis court. The initial outlay was 10000 rather than 8000: you need to alter the data to fix the error.
 
 ```
-UPDATE cd.facilities SET initialoutlay = 10000 WHERE name LIKE 'Tennis Court 2';
+UPDATE cd.facilities
+SET initialoutlay = 10000
+WHERE name = 'Tennis Court 2';
 ```
 
 5. Update multiple rows and columns at the same time
@@ -255,7 +258,9 @@ UPDATE cd.facilities SET initialoutlay = 10000 WHERE name LIKE 'Tennis Court 2';
 We want to increase the price of the tennis courts for both members and guests. Update the costs to be 6 for members, and 30 for guests.
 
 ```
-UPDATE cd.facilities SET guestcost = 30, membercost = 6 WHERE name LIKE 'Tennis%';
+UPDATE cd.facilities
+SET guestcost = 30, membercost = 6
+WHERE name LIKE 'Tennis%';
 ```
 
 6. Update a row based on the contents of another row
@@ -263,9 +268,19 @@ UPDATE cd.facilities SET guestcost = 30, membercost = 6 WHERE name LIKE 'Tennis%
 We want to alter the price of the second tennis court so that it costs 10% more than the first one. Try to do this without using constant values for the prices, so that we can reuse the statement if we want to.
 
 ```
-UPDATE cd.facilities SET membercost = (SELECT membercost*1.1 FROM cd.facilities WHERE name LIKE 'Tennis Court 1'), guestcost = (SELECT guestcost*1.1 FROM cd.facilities WHERE name LIKE 'Tennis Court 1') WHERE name LIKE 'Tennis Court 2';
+UPDATE cd.facilities
+SET membercost = (
+  SELECT membercost*1.1 FROM cd.facilities WHERE name LIKE 'Tennis Court 1'
+), guestcost = (
+  SELECT guestcost*1.1 FROM cd.facilities WHERE name LIKE 'Tennis Court 1'
+) WHERE name LIKE 'Tennis Court 2';
 
-UPDATE cd.facilities facs SET membercost = facs2.membercost * 1.1, guestcost = facs2.guestcost * 1.1 FROM (SELECT * FROM cd.facilities WHERE facid = 0) facs2 WHERE facs.facid = 1;
+UPDATE cd.facilities facs
+SET membercost = facs2.membercost * 1.1, guestcost = facs2.guestcost * 1.1
+FROM (
+  SELECT * FROM cd.facilities WHERE facid = 0
+) facs2
+WHERE facs.facid = 1;
 ```
 
 7. Delete all bookings
@@ -273,7 +288,8 @@ UPDATE cd.facilities facs SET membercost = facs2.membercost * 1.1, guestcost = f
 As part of a clearout of our database, we want to delete all bookings from the cd.bookings table. How can we accomplish this?
 
 ```
-DELETE FROM cd.bookings;
+DELETE
+FROM cd.bookings;
 ```
 
 8. Delete a member from the cd.members table
@@ -281,7 +297,9 @@ DELETE FROM cd.bookings;
 We want to remove member 37, who has never made a booking, from our database. How can we achieve that?
 
 ```
-DELETE FROM cd.members WHERE memid = 37;
+DELETE
+FROM cd.members
+WHERE memid = 37;
 ```
 
 9. Delete based on a subquery
@@ -289,7 +307,11 @@ DELETE FROM cd.members WHERE memid = 37;
 In our previous exercises, we deleted a specific member who had never made a booking. How can we make that more general, to delete all members who have never made a booking?
 
 ```
-DELETE FROM cd.members WHERE memid NOT IN (SELECT memid FROM cd.bookings);
+DELETE
+FROM cd.members
+WHERE memid NOT IN (
+  SELECT memid FROM cd.bookings
+);
 ```
 
 ## Aggregation
@@ -299,7 +321,8 @@ DELETE FROM cd.members WHERE memid NOT IN (SELECT memid FROM cd.bookings);
 For our first foray into aggregates, we're going to stick to something simple. We want to know how many facilities exist - simply produce a total count.
 
 ```
-SELECT count(*) FROM cd.facilities;
+SELECT COUNT(*)
+FROM cd.facilities;
 ```
 
 2. Count the number of expensive facilities
@@ -307,7 +330,9 @@ SELECT count(*) FROM cd.facilities;
 Produce a count of the number of facilities that have a cost to guests of 10 or more.
 
 ```
-SELECT count(*) FROM cd.facilities WHERE guestcost >= 10;
+SELECT COUNT(*)
+FROM cd.facilities
+WHERE guestcost >= 10;
 ```
 
 3. Count the number of recommendations each member makes.
@@ -315,7 +340,11 @@ SELECT count(*) FROM cd.facilities WHERE guestcost >= 10;
 Produce a count of the number of recommendations each member has made. Order by member ID.
 
 ```
-SELECT recommendedby, COUNT(*) FROM cd.members WHERE recommendedby IS NOT NULL GROUP BY recommendedby ORDER BY recommendedby;
+SELECT recommendedby, COUNT(*)
+FROM cd.members
+WHERE recommendedby IS NOT NULL
+GROUP BY recommendedby
+ORDER BY recommendedby;
 ```
 
 4. List the total slots booked per facility
@@ -323,7 +352,10 @@ SELECT recommendedby, COUNT(*) FROM cd.members WHERE recommendedby IS NOT NULL G
 Produce a list of the total number of slots booked per facility. For now, just produce an output table consisting of facility id and slots, sorted by facility id.
 
 ```
-SELECT facid, SUM(slots) AS "Total Slots" FROM cd.bookings GROUP BY facid ORDER BY facid;
+SELECT facid, SUM(slots) AS "Total Slots"
+FROM cd.bookings
+GROUP BY facid
+ORDER BY facid;
 ```
 
 5. List the total slots booked per facility in a given month
@@ -331,7 +363,11 @@ SELECT facid, SUM(slots) AS "Total Slots" FROM cd.bookings GROUP BY facid ORDER 
 Produce a list of the total number of slots booked per facility in the month of September 2012. Produce an output table consisting of facility id and slots, sorted by the number of slots.
 
 ```
-SELECT facid, SUM(slots) AS "Total Slots" FROM cd.bookings WHERE starttime >= '2012-09-01 00:00:00' AND starttime <= '2012-10-01 00:00:00'  GROUP BY facid ORDER BY "Total Slots";
+SELECT facid, SUM(slots) AS "Total Slots"
+FROM cd.bookings
+WHERE starttime >= '2012-09-01 00:00:00' AND starttime <= '2012-10-01 00:00:00'
+GROUP BY facid
+ORDER BY "Total Slots";
 ```
 
 6. List the total slots booked per facility per month
@@ -339,9 +375,16 @@ SELECT facid, SUM(slots) AS "Total Slots" FROM cd.bookings WHERE starttime >= '2
 Produce a list of the total number of slots booked per facility per month in the year of 2012. Produce an output table consisting of facility id and slots, sorted by the id and month.
 
 ```
-SELECT facid, EXTRACT(MONTH FROM starttime) AS month, SUM(slots) AS "Total Slots" FROM cd.bookings WHERE starttime >= '2012-01-01 00:00:00' AND starttime < '2013-01-01 00:00:00' GROUP BY facid, month ORDER BY facid, month;
+SELECT facid, EXTRACT(MONTH FROM starttime) AS month, SUM(slots) AS "Total Slots"
+FROM cd.bookings WHERE starttime >= '2012-01-01 00:00:00' AND starttime < '2013-01-01 00:00:00'
+GROUP BY facid, month
+ORDER BY facid, month;
 
-SELECT facid, EXTRACT(MONTH FROM starttime) AS month, SUM(slots) AS "Total Slots" FROM cd.bookings WHERE EXTRACT(YEAR FROM starttime) = 2012 GROUP BY facid, month ORDER BY facid, month;
+SELECT facid, EXTRACT(MONTH FROM starttime) AS month, SUM(slots) AS "Total Slots"
+FROM cd.bookings
+WHERE EXTRACT(YEAR FROM starttime) = 2012
+GROUP BY facid, month
+ORDER BY facid, month;
 ```
 
 7. Find the count of members who have made at least one booking
@@ -349,7 +392,9 @@ SELECT facid, EXTRACT(MONTH FROM starttime) AS month, SUM(slots) AS "Total Slots
 Find the total number of members (including guests) who have made at least one booking.
 
 ```
-SELECT COUNT (DISTINCT memid) FROM cd.bookings WHERE slots > 0;
+SELECT COUNT (DISTINCT memid)
+FROM cd.bookings
+WHERE slots > 0;
 ```
 
 8. List facilities with more than 1000 slots booked
@@ -357,7 +402,11 @@ SELECT COUNT (DISTINCT memid) FROM cd.bookings WHERE slots > 0;
 Produce a list of facilities with more than 1000 slots booked. Produce an output table consisting of facility id and slots, sorted by facility id.
 
 ```
-SELECT facid, SUM(slots) AS "Total Slots" FROM cd.bookings GROUP BY facid HAVING SUM(slots) > 1000 ORDER BY facid;
+SELECT facid, SUM(slots) AS "Total Slots"
+FROM cd.bookings
+GROUP BY facid
+HAVING SUM(slots) > 1000
+ORDER BY facid;
 ```
 
 9. Find the total revenue of each facility
@@ -553,5 +602,30 @@ SELECT TIMESTAMP '2012-08-31 01:00:00' - TIMESTAMP '2012-07-30 01:00:00' AS inte
 Produce a list of all the dates in October 2012. They can be output as a timestamp (with time set to midnight) or a date.
 
 ```
+SELECT * FROM generate_series('2012-10-01 00:00'::TIMESTAMP, '2012-10-31 00:00', '1 day') AS ts;
 
+SELECT generate_series(TIMESTAMP '2012-10-01', TIMESTAMP '2012-10-31', interval '1 day') AS ts;    
+```
+
+4. Get the day of the month from a timestamp
+
+Get the day of the month from the timestamp '2012-08-31' as an integer.
+
+```
+SELECT EXTRACT(DAY FROM TIMESTAMP '2012-08-31');
+```
+
+5. Work out the number of seconds between timestamps
+
+Work out the number of seconds between the timestamps '2012-08-31 01:00:00' and '2012-09-02 00:00:00'
+
+```
+SELECT EXTRACT(EPOCH FROM TIMESTAMP '2012-09-02 00:00:00' - TIMESTAMP '2012-08-31 01:00:00');
+```
+
+6. Work out the number of days in each month of 2012
+
+For each month of the year in 2012, output the number of days in that month. Format the output as an integer column containing the month of the year, and a second column containing an interval data type.
+
+```
 ```

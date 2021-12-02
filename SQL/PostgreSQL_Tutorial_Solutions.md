@@ -628,4 +628,72 @@ SELECT EXTRACT(EPOCH FROM TIMESTAMP '2012-09-02 00:00:00' - TIMESTAMP '2012-08-3
 For each month of the year in 2012, output the number of days in that month. Format the output as an integer column containing the month of the year, and a second column containing an interval data type.
 
 ```
+SELECT EXTRACT(MONTH FROM generate_series(TIMESTAMP '2012-01-01', TIMESTAMP '2012-12-31', interval '1 month')) AS month,
+EXTRACT(DAYS FROM date_trunc('month', generate_series(TIMESTAMP '2012-01-01', TIMESTAMP '2012-12-31', interval '1 month')) + interval '1 month - 1 day') || ' ' || 'days' AS length;
+
+SELECT EXTRACT(month FROM cal.month) AS month,
+	(cal.month + interval '1 month') - cal.month AS length
+	FROM
+	(
+		SELECT generate_series(TIMESTAMP '2012-01-01', TIMESTAMP '2012-12-01', interval '1 month') AS month
+	) cal
+ORDER BY month;  
+```
+
+7. Work out the number of days remaining in the month
+
+For any given timestamp, work out the number of days remaining in the month. The current day should count as a whole day, regardless of the time. Use '2012-02-11 01:00:00' as an example timestamp for the purposes of making the answer. Format the output as a single interval value.
+
+```
+SELECT DATE_TRUNC('month', TIMESTAMP '2012-02-11 01:00:00') + interval '1 month' - DATE_TRUNC('day', TIMESTAMP '2012-02-11 01:00:00') AS remaining;
+
+SELECT (DATE_TRUNC('month',ts.testts) + interval '1 month')
+		- DATE_TRUNC('day', ts.testts) AS remaining
+	FROM (SELECT timestamp '2012-02-11 01:00:00' AS testts) ts  
+```
+
+8. Work out the end time of bookings
+
+Return a list of the start and end time of the last 10 bookings (ordered by the time at which they end, followed by the time at which they start) in the system.
+
+```
+SELECT starttime, starttime + slots*30 * interval '1 minute' AS endtime
+FROM cd.bookings
+ORDER BY endtime DESC, starttime DESC
+LIMIT 10;
+```
+
+9. Return a count of bookings for each month
+
+Return a count of bookings for each month, sorted by month
+
+```
+```
+
+10. Work out the utilisation percentage for each facility by month
+
+Work out the utilisation percentage for each facility by month, sorted by name and month, rounded to 1 decimal place. Opening time is 8am, closing time is 8.30pm. You can treat every month as a full month, regardless of if there were some dates the club was not open.
+
+```
+```
+
+## String
+
+1. Format the names of members
+
+Output the names of all members, formatted as 'Surname, Firstname'
+
+```
+SELECT surname || ', ' || firstname
+FROM cd.members;
+```
+
+2. Find facilities by a name prefix
+
+Find all facilities whose name begins with 'Tennis'. Retrieve all columns.
+
+```
+SELECT *
+FROM cd.facilities
+WHERE name LIKE 'Tennis%';
 ```

@@ -697,3 +697,67 @@ SELECT *
 FROM cd.facilities
 WHERE name LIKE 'Tennis%';
 ```
+
+3. Find telephone numbers with parentheses
+
+You've noticed that the club's member table has telephone numbers with very inconsistent formatting. You'd like to find all the telephone numbers that contain parentheses, returning the member ID and telephone number sorted by member ID.
+
+```
+SELECT memid, telephone
+FROM cd.members
+WHERE telephone ~ '[()]'
+ORDER BY memid;
+```
+
+4. Pad zip codes with leading zeroes
+
+The zip codes in our example dataset have had leading zeroes removed from them by virtue of being stored as a numeric type. Retrieve all zip codes from the members table, padding any zip codes less than 5 characters long with leading zeroes. Order by the new zip code.
+
+```
+SELECT LPAD(CAST(zipcode AS char(5)),5,'0')
+FROM cd.members;
+```
+
+5. Count the number of members whose surname starts with each letter of the alphabet
+
+You'd like to produce a count of how many members you have whose surname starts with each letter of the alphabet. Sort by the letter, and don't worry about printing out a letter if the count is 0.
+
+```
+SELECT SUBSTR(surname,1,1) AS letter, COUNT(*)
+FROM cd.members
+GROUP BY letter
+ORDER BY letter;
+```
+
+6. Clean up telephone numbers
+
+The telephone numbers in the database are very inconsistently formatted. You'd like to print a list of member ids and numbers that have had '-','(',')', and ' ' characters removed. Order by member id.
+
+```
+SELECT memid, TRANSLATE(telephone,'() -', '')
+FROM cd.members
+ORDER BY memid;
+```
+
+## Recursive
+
+1. Find the upward recommendation chain for member ID 27
+
+Find the upward recommendation chain for member ID 27: that is, the member who recommended them, and the member who recommended that member, and so on. Return member ID, first name, and surname. Order by descending member id.
+
+```
+```
+
+2. Find the downward recommendation chain for member ID 1
+
+Find the downward recommendation chain for member ID 1: that is, the members they recommended, the members those members recommended, and so on. Return member ID and name, and order by ascending member id.
+
+```
+```
+
+3. Produce a CTE that can return the upward recommendation chain for any member
+
+Produce a CTE that can return the upward recommendation chain for any member. You should be able to select recommender from recommenders where member=x. Demonstrate it by getting the chains for members 12 and 22. Results table should have member and recommender, ordered by member ascending, recommender descending.
+
+```
+ ```
